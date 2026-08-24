@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HR AI Assistant (Internal — Prototype)
 
-## Getting Started
+Internal HR chat assistant with mocked AI streaming responses.
+Bilingual (Arabic/English), RTL-aware, intranet-only — no real backend.
 
-First, run the development server:
+See [`docs/context.md`](./docs/context.md) for full scope, MVP definition,
+and what's intentionally cut for this iteration.
 
-```bash
+## Requirements
+- Node version pinned in `.nvmrc` (use `nvm use` if you have nvm installed)
+- No environment variables needed — everything is mocked, no real API keys
+
+## Getting started
+
+\`\`\`bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+\`\`\`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Running tests
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+\`\`\`bash
+npm test          # unit tests (Jest + Testing Library)
+npm run test:watch
+npx playwright test   # end-to-end tests
+\`\`\`
 
-## Learn More
+## Linting & formatting
 
-To learn more about Next.js, take a look at the following resources:
+\`\`\`bash
+npx eslint . --max-warnings=0
+\`\`\`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Formatting and lint-fixing run automatically on commit via Husky + lint-staged.
+Accessibility rules (jsx-a11y) are enforced as lint errors, not warnings.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+\`\`\`
+src/
+  app/            → Next.js routes only, no business logic
+  features/       → auth, chat, dashboard — each self-contained
+  shared/         → locale (RTL/i18n context), ui (generic components)
+  lib/mock-api/   → mocked auth + streaming endpoints
+docs/adr/         → architectural decisions, with reasoning
+\`\`\`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key architectural decisions
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Full reasoning lives in `docs/adr/`. Summary:
+- **0001** — Next.js App Router (needed for real streaming support)
+- **0002** — Lightweight custom locale context, not a full i18n library
+- **0003** — React Query for chat history/session, Zustand for live
+  streaming buffer + UI state
+- **0004** — Tailwind with logical properties (`ms-`/`me-`) for RTL,
+  not physical (`ml-`/`mr-`)
+- **0005** — AI streaming is mocked via a real `ReadableStream` Route
+  Handler, not faked client-side — this matters if you're extending
+  the chat feature
+
+## Before opening a PR
+
+See `.github/pull_request_template.md` — it encodes the project's
+Definition of Done (RTL check, a11y, cross-browser, tests, CI).
